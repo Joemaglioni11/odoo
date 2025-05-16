@@ -14,6 +14,12 @@ import { escape } from "@web/core/utils/strings";
 function parseAndTransform(htmlString, transformFunction) {
     var openToken = "OPEN" + Date.now();
     var string = htmlString.replace(/&lt;/g, openToken);
+    if (typeof DOMPurify !== "undefined") {
+        string = DOMPurify.sanitize(string);
+    } else {
+        console.warn("DOMPurify no está definido: contenido no será sanitizado.");
+    }
+
     var children;
     try {
         children = $("<div>").html(string).contents();
@@ -109,7 +115,7 @@ function addLink(node, transformChildren) {
         const linkified = linkify(node.data);
         if (linkified !== node.data) {
             const div = document.createElement("div");
-            div.innerHTML = linkified;
+            div.innerHTML = DOMPurify.sanitize(linkified);
             for (const childNode of [...div.childNodes]) {
                 node.parentNode.insertBefore(childNode, node);
             }
@@ -134,10 +140,11 @@ function htmlToTextContentInline(htmlString) {
     const div = document.createElement("div");
     fragment.appendChild(div);
     htmlString = htmlString.replace(/<br\s*\/?>/gi, " ");
+    safeHtml = DOMPurify.sanitize(htmlString);
     try {
-        div.innerHTML = htmlString;
+        div.innerHTML = safeHtml;
     } catch {
-        div.innerHTML = `<pre>${htmlString}</pre>`;
+        div.innerHTML = `<pre>${safeHtml}</pre>`;
     }
     return div.textContent
         .trim()
@@ -168,7 +175,11 @@ function inline(node, transform_children) {
     if (node.tagName.match(/^(A|P|DIV|PRE|BLOCKQUOTE)$/)) {
         return transform_children();
     }
-    node.innerHTML = transform_children();
+    const rawHtml = transform_children();
+    const safeHtml = typeof DOMPurify !== "undefined"
+        ? DOMPurify.sanitize(rawHtml)
+        : rawHTML;
+    node.innerHTML = safeHtml;
     return node.outerHTML;
 }
 

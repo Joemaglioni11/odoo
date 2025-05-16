@@ -556,7 +556,7 @@ export class Link extends Component {
             const linkText = weUtils.getLinkLabel(linkNode);
             this.state.originalText = linkText.replace(/[ \t\r\n]+/g, ' ');
             if (linkNode instanceof DocumentFragment) {
-                this.state.originalHTML = $('<fakeEl>').append(linkNode).html();
+                this.state.originalHTML = DOMPurify.sanitize($('<fakeEl>').append(linkNode).html())
             } else {
                 this.state.originalHTML = linkNode.innerHTML;
             }

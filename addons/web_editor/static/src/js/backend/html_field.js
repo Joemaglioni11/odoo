@@ -472,7 +472,7 @@ export class HtmlField extends Component {
 
         if (this.iframePromise && iframeTarget) {
             if (iframeTarget.innerHTML !== this.props.record.data[this.props.name]) {
-                iframeTarget.innerHTML = this.props.record.data[this.props.name];
+                iframeTarget.innerHTML = DOMPurify.sanitize(this.props.record.data[this.props.name]);
                 retargetLinks(iframeTarget);
             }
             return this.iframePromise;
@@ -541,7 +541,7 @@ export class HtmlField extends Component {
 
                 if (!this.sandboxedPreview) {
                     const iframeTarget = cwindow.document.querySelector('#iframe_target');
-                    iframeTarget.innerHTML = value;
+                    iframeTarget.innerHTML = DOMPurify.sanitize(value);
 
                     const script = cwindow.document.createElement('script');
                     script.setAttribute('type', 'text/javascript');
@@ -553,7 +553,7 @@ export class HtmlField extends Component {
                     script.append(scriptTextNode);
                     cwindow.document.body.append(script);
                 } else {
-                    cwindow.document.documentElement.innerHTML = value;
+                    cwindow.document.documentElement.innerHTML = DOMPurify.sanitize(value);
                 }
 
                 const height = cwindow.document.body.scrollHeight;

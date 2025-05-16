@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, tools
-
+from psycopg2 import sql
 
 class HrEmployeePublic(models.Model):
     _name = "hr.employee.public"
@@ -86,8 +86,10 @@ class HrEmployeePublic(models.Model):
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
-        self.env.cr.execute("""CREATE or REPLACE VIEW %s as (
-            SELECT
-                %s
-            FROM hr_employee emp
-        )""" % (self._table, self._get_fields()))
+        fields = sql.SQL(',').join(map(sql.Identifier, self._get_fields().replace("emp.","").split(",")))
+        query = sql.SQL("CREATE OR REPLACE VIEW {} AS (SELECT {} FROM hr_employee emp)").format(
+            sql.Identifier(self._table),
+            fields
+        )
+        self.env.cr.execute(query)
+

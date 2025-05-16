@@ -95,7 +95,8 @@ publicWidget.registry.PaymentPostProcessing = publicWidget.Widget.extend({
     _renderTemplate(xmlid, display_values={}) {
         this.call('ui', 'unblock');
         const statusContainer = document.querySelector('div[name="o_payment_status_content"]');
-        statusContainer.innerHTML = renderToElement(xmlid, display_values).innerHTML;
+        const renderedElement = renderToElement(xmlid, display_values);
+        statusContainer.innerHTML = DOMPurify.sanitize(renderedElement.innerHTML);
     },
 
 });

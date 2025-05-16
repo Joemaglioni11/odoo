@@ -13,6 +13,7 @@ from odoo import api, fields, models, Command
 from odoo import SUPERUSER_ID, _
 from odoo.exceptions import ValidationError, UserError
 from odoo.tools import mute_logger
+from psycopg2.sql import SQL, Identifier
 
 _logger = logging.getLogger('odoo.addons.base.partner.merge')
 
@@ -152,12 +153,19 @@ class MergePartnerAutomatic(models.TransientModel):
             else:
                 try:
                     with mute_logger('odoo.sql_db'), self._cr.savepoint():
-                        query = 'UPDATE "%(table)s" SET "%(column)s" = %%s WHERE "%(column)s" IN %%s' % query_dic
+                        query = SQL('UPDATE {} SET {} = %s WHERE {} IN %s').format(
+                            Identifier(table),
+                            Identifier(column),
+                            Identifier(column)
+                        )
                         self._cr.execute(query, (dst_partner.id, tuple(src_partners.ids),))
                 except psycopg2.Error:
                     # updating fails, most likely due to a violated unique constraint
                     # keeping record with nonexistent partner_id is useless, better delete it
-                    query = 'DELETE FROM "%(table)s" WHERE "%(column)s" IN %%s' % query_dic
+                    query = SQL('DELETE FROM {} WHERE {} IN %s').format(
+                        Identifier(table),
+                        Identifier(column)
+                    )
                     self._cr.execute(query, (tuple(src_partners.ids),))
 
     @api.model

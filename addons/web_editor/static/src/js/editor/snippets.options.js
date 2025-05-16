@@ -9101,7 +9101,7 @@ registry.many2one = SnippetOptionWidget.extend({
                         [[contactId]],
                         {options: JSON.parse(node.dataset.oeContactOptions)}
                     );
-                    $(node).html(html);
+                    $(node).html(DOMPurify.sanitize(html));
                 } else {
                     node.textContent = defaultText;
                 }

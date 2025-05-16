@@ -429,7 +429,7 @@ export class Message extends Component {
 
     enterEditMode() {
         const body = document.createElement("span");
-        body.innerHTML = this.props.message.body;
+        body.innerHTML = DOMPurify.sanitize(this.props.message.body);
         const mentionedChannelElements = body.querySelectorAll(".o_channel_redirect");
         const mentionedChannels = Array.from(mentionedChannelElements).map((el) =>
             this.store.Thread.insert({

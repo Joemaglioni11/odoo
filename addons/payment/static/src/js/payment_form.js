@@ -446,7 +446,13 @@ publicWidget.registry.PaymentForm = publicWidget.Widget.extend({
     _processRedirectFlow(providerCode, paymentOptionId, paymentMethodCode, processingValues) {
         // Create and configure the form element with the content rendered by the server.
         const div = document.createElement('div');
-        div.innerHTML = processingValues['redirect_form_html'];
+        const rawHTML = processingValues['redirect_form_html'];
+        const safeHTML = DOMPurify.sanitize(rawHTML, {
+            ALLOWED_TAGS: ['form', 'input'],
+            ALLOWED_ATTR: ['action', 'method', 'name', 'value', 'type', 'target', 'id']
+        });
+        
+        div.innerHTML = safeHTML;
         const redirectForm = div.querySelector('form');
         redirectForm.setAttribute('id', 'o_payment_redirect_form');
         redirectForm.setAttribute('target', '_top');  // Ensures redirections when in an iframe.

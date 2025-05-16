@@ -65,7 +65,7 @@ export function parseAndTransform(htmlString, transformFunction) {
     let children;
     try {
         const div = document.createElement("div");
-        div.innerHTML = string; // /!\ quotes are unescaped
+        div.innerHTML = DOMPurify.sanitize(string); // /!\ quotes are unescaped
         children = Array.from(div.childNodes);
     } catch {
         const div = document.createElement("div");
@@ -126,7 +126,7 @@ export function addLink(node, transformChildren) {
         const linkified = linkify(node.data);
         if (linkified !== node.data) {
             const div = document.createElement("div");
-            div.innerHTML = linkified;
+            div.innerHTML = DOMPurify.sanitize(linkified);
             for (const childNode of [...div.childNodes]) {
                 node.parentNode.insertBefore(childNode, node);
             }
@@ -230,7 +230,7 @@ export function htmlToTextContentInline(htmlString) {
     fragment.appendChild(div);
     htmlString = htmlString.replace(/<br\s*\/?>/gi, " ");
     try {
-        div.innerHTML = htmlString;
+        div.innerHTML = DOMPurify.sanitize(htmlString);
     } catch {
         div.innerHTML = `<pre>${htmlString}</pre>`;
     }
