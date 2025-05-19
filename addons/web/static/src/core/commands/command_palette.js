@@ -293,7 +293,10 @@ export class CommandPalette extends Component {
             if (!ctrlKey) {
                 this.executeCommand(selectedCommand);
             } else if (selectedCommand.href) {
-                window.open(selectedCommand.href, "_blank");
+                const newWindow = window.open(selectedCommand.href, "_blank");
+                if (newWindow){
+                    newWindow.opener = null;
+                }
             }
         }
     }
