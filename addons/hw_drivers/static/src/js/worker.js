@@ -23,7 +23,7 @@
                     }
                     if (data.result.rendered_html) {
                         var trimmed = $.trim(data.result.rendered_html);
-                        var $parsedHTML = $('<div>').html($.parseHTML(trimmed,true)); // WARNING: the true here will executes any script present in the string to parse
+                        var $parsedHTML = $('<div>').html($.parseHTML(trimmed,false)); // WARNING: the true here will executes any script present in the string to parse
                         var new_client_url = $parsedHTML.find(".resources > base").attr('href');
 
                         if (!mergedHead || (current_client_url !== new_client_url)) {
