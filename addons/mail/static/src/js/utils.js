@@ -125,10 +125,10 @@ function addLink(node, transformChildren) {
         return node.textContent;
     }
     if (node.tagName === "A") {
-        return node.outerHTML;
+        return DOMPurify.sanitize(node.outerHTML);
     }
     transformChildren();
-    return node.outerHTML;
+    return DOMPurify.sanitize(node.outerHTML);
 }
 
 /**
@@ -176,9 +176,10 @@ function inline(node, transform_children) {
         return transform_children();
     }
     const rawHtml = transform_children();
-    const safeHtml = typeof DOMPurify !== "undefined"
-        ? DOMPurify.sanitize(rawHtml)
-        : rawHTML;
+    if (typeof window === "undefined" || typeof window.DOMPurify === "undefined") {
+        throw new Error("DOMPurify is required but not available globally.");
+    }
+    const safeHtml = window.DOMPurify.sanitize(rawHtml);
     node.innerHTML = safeHtml;
     return node.outerHTML;
 }
