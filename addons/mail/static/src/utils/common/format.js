@@ -69,7 +69,8 @@ export function parseAndTransform(htmlString, transformFunction) {
         children = Array.from(div.childNodes);
     } catch {
         const div = document.createElement("div");
-        div.innerHTML = `<pre>${string}</pre>`;
+        const safe = DOMPurify.sanitize(string);
+        div.innerHTML = `<pre>${safe}</pre>`;
         children = Array.from(div.childNodes);
     }
     return _parseAndTransform(children, transformFunction).replace(

@@ -17,7 +17,7 @@ function parseAndTransform(htmlString, transformFunction) {
     if (typeof DOMPurify !== "undefined") {
         string = DOMPurify.sanitize(string);
     } else {
-        console.warn("DOMPurify no está definido: contenido no será sanitizado.");
+        throw new Error("DOMPurify is required but not available globally.");
     }
 
     var children;
