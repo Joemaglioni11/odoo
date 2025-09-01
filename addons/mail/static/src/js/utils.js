@@ -120,7 +120,7 @@ function addLink(node, transformChildren) {
                 node.parentNode.insertBefore(childNode, node);
             }
             node.parentNode.removeChild(node);
-            return linkified;
+            return DOMPurify.sanitize(linkified);
         }
         return node.textContent;
     }
