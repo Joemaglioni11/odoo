@@ -17,7 +17,7 @@ function parseAndTransform(htmlString, transformFunction) {
     if (typeof DOMPurify !== "undefined") {
         string = DOMPurify.sanitize(string);
     } else {
-        console.warn("DOMPurify no está definido: contenido no será sanitizado.");
+        throw new Error("DOMPurify is required but not available globally.");
     }
 
     var children;
@@ -120,7 +120,7 @@ function addLink(node, transformChildren) {
                 node.parentNode.insertBefore(childNode, node);
             }
             node.parentNode.removeChild(node);
-            return linkified;
+            return DOMPurify.sanitize(linkified);
         }
         return node.textContent;
     }

@@ -69,7 +69,8 @@ export function parseAndTransform(htmlString, transformFunction) {
         children = Array.from(div.childNodes);
     } catch {
         const div = document.createElement("div");
-        div.innerHTML = `<pre>${string}</pre>`;
+        const safe = DOMPurify.sanitize(string);
+        div.innerHTML = `<pre>${safe}</pre>`;
         children = Array.from(div.childNodes);
     }
     return _parseAndTransform(children, transformFunction).replace(
@@ -87,17 +88,23 @@ export function parseAndTransform(htmlString, transformFunction) {
  * @return {string}
  */
 function _parseAndTransform(nodes, transformFunction) {
-    if (!nodes) {
-        return;
-    }
-    return Object.values(nodes)
-        .map((node) => {
-            return transformFunction(node, function () {
-                return _parseAndTransform(node.childNodes, transformFunction);
-            });
-        })
-        .join("");
+  if (!nodes) return "";
+
+  const html = Object.values(nodes)
+    .map((node) => {
+      const out = transformFunction(node, () => (
+        _parseAndTransform(node.childNodes, transformFunction)
+      ));
+      return typeof out === "string" ? out : "";
+    })
+    .join("");
+
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['a','b','i','u','strong','em','span','div','pre','code','br','p','ul','ol','li','img'],
+    ALLOWED_ATTR: ['href','title','target','rel','src','alt','class','id','name'],
+  });
 }
+
 
 /**
  * @param {string} text
@@ -131,15 +138,15 @@ export function addLink(node, transformChildren) {
                 node.parentNode.insertBefore(childNode, node);
             }
             node.parentNode.removeChild(node);
-            return linkified;
+            return DOMPurify.sanitize(linkified)
         }
         return node.textContent;
     }
     if (node.tagName === "A") {
-        return node.outerHTML;
+        return DOMPurify.sanitize(node.outerHTML);
     }
     transformChildren();
-    return node.outerHTML;
+    return DOMPurify.sanitize(node.outerHTML);
 }
 
 /**
