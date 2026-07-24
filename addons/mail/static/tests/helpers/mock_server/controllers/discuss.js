@@ -156,8 +156,8 @@ patch(MockServer.prototype, {
             return this._mockRouteMailPartnerFromEmail(args.emails, args.additional_values);
         }
         if (route === "/mail/read_subscription_data") {
-            const follower_id = args.follower_id;
-            return this._mockRouteMailReadSubscriptionData(follower_id);
+            const { follower_id, thread_model, thread_id } = args;
+            return this._mockRouteMailReadSubscriptionData(follower_id, thread_model, thread_id);
         }
         if (route === "/mail/rtc/channel/join_call") {
             return this._mockRouteMailRtcChannelJoinCall(
@@ -494,10 +494,16 @@ patch(MockServer.prototype, {
      *
      * @private
      * @param {integer} follower_id
+     * @param {string} thread_model
+     * @param {integer} thread_id
      * @returns {Object[]} list of followed subtypes
      */
-    async _mockRouteMailReadSubscriptionData(follower_id) {
-        const follower = this.getRecords("mail.followers", [["id", "=", follower_id]])[0];
+    async _mockRouteMailReadSubscriptionData(follower_id, thread_model, thread_id) {
+        const follower = this.getRecords("mail.followers", [
+            ["id", "=", follower_id],
+            ["res_model", "=", thread_model],
+            ["res_id", "=", thread_id],
+        ])[0];
         const subtypes = this.getRecords("mail.message.subtype", [
             "&",
             ["hidden", "=", false],
