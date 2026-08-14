@@ -35,6 +35,8 @@ export class FollowerSubtypeDialog extends Component {
         onWillStart(async () => {
             this.state.subtypes = await this.rpc("/mail/read_subscription_data", {
                 follower_id: this.props.follower.id,
+                thread_model: this.props.follower.followedThread.model,
+                thread_id: this.props.follower.followedThread.id,
             });
         });
     }

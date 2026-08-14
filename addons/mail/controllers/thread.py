@@ -36,16 +36,20 @@ class ThreadController(http.Controller):
         return partners
 
     @http.route("/mail/read_subscription_data", methods=["POST"], type="json", auth="user")
-    def read_subscription_data(self, follower_id):
+    def read_subscription_data(self, follower_id, thread_model, thread_id):
         """Computes:
         - message_subtype_data: data about document subtypes: which are
             available, which are followed if any"""
-        request.env["mail.followers"].check_access_rights("read")
-        follower = request.env["mail.followers"].sudo().browse(follower_id)
-        follower.ensure_one()
-        request.env[follower.res_model].check_access_rights("read")
-        record = request.env[follower.res_model].browse(follower.res_id)
+        # CVE-2024-36259: validate access on the document the caller claims to be
+        # looking at *before* resolving the follower, instead of trusting a bare
+        # follower_id to reverse-lookup an arbitrary res_model/res_id (which turned
+        # an unauthenticated existence/access check into a yes/no oracle).
+        request.env[thread_model].check_access_rights("read")
+        record = request.env[thread_model].browse(thread_id)
         record.check_access_rule("read")
+        follower = request.env["mail.followers"].sudo().browse(follower_id)
+        if not follower.exists() or follower.res_model != thread_model or follower.res_id != thread_id:
+            raise NotFound()
         # find current model subtypes, add them to a dictionary
         subtypes = record._mail_get_message_subtypes()
         followed_subtypes_ids = set(follower.subtype_ids.ids)

@@ -13,6 +13,7 @@ from . import test_res_company
 from . import test_res_partner
 from . import test_res_users
 from . import test_res_users_settings
+from . import test_read_subscription_data_security
 from . import test_translation_controller
 from . import test_uninstall
 from . import test_update_notification
